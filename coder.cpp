@@ -83,60 +83,44 @@ void Coder::decoder(QByteArray input)
         {
             QJsonObject object = document.object();
             if(object.contains("Kind"))
-            {
                 if(object.value("Kind").isString())
-                {
                     switch (Kind(QMetaEnum::fromType<Coder::Kind>().keysToValue(object.value("Kind").toString().toLatin1())))
                     {
                         case Kind::Beat:
                         {
                             if(object.contains("Sender"))
-                            {
                                 if(object.value("Sender").isObject())
                                 {
                                     QJsonObject senderObject=object.value("Sender").toObject();
                                     if(senderObject.contains("Com")&&senderObject.contains("Name"))
-                                    {
                                         if(senderObject.value("Com").isString()&&senderObject.value("Name").isString())
                                         {
                                             com=senderObject.value("Com").toString();
                                             name=senderObject.value("Name").toString();
                                         }
                                         else return;
-                                    }
                                     else return;
                                 }
                                 else return;
-
-                            }
                             else return;
                             if(object.contains("Body"))
-                            {
                                 if(object.value("Body").isObject())
                                 {
                                     QJsonObject bodyObject=object.value("Body").toObject();
                                     if(bodyObject.contains("Time"))
-                                    {
                                         if(bodyObject.value("Time").isString())
                                             time=bodyObject.value("Time").toString();
                                         else return;
-                                    }
                                     else return;
                                 }
                                 else return;
-                            }
                             else {return;}
                             emit coder_receiveBeat(com,name,time);
                         }
-                        case Kind::Debug:
-                        {
-                            //啥都不干
-                        }
+                        case Kind::Debug:break;
                         default:break;
                     }
-                }
-                else return;
-            }
         }
+        else return;
     }
 }
