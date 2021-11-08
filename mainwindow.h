@@ -20,15 +20,21 @@ public:
     ~MainWindow();
     bool openSerialPort(QString portName);
 
+    const QString &getUserName() const;
+    void setUserName(const QString &newUserName);
+    virtual void closeEvent (QCloseEvent * event);
+
 private:
     Ui::MainWindow *ui;
     QSerialPort *serialCom;
     QTimer *timer;
+    QString userName;
 
 private slots:
     void serial_readData();
     void serial_writeData(const QByteArray &data);
     void timer_timeOut();
+    void serial_receiveBeat(QString com,QString name,QString time);
 };
 
 #endif // MAINWINDOW_H

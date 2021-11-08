@@ -1,3 +1,5 @@
+#include "config.h"
+#include "debugthread.h"
 #include "joindialog.h"
 
 #include <windows.h>
@@ -23,7 +25,19 @@ int main(int argc, char *argv[])
             break;
         }
     }
+#if DEBUG_MULTI==1
     joinDialog w;
     w.show();
+#else
+    DebugThread* threads[DEBUG_MULTI];
+    for(int i=0;i<DEBUG_MULTI;i++)
+    {
+        threads[i]=new DebugThread();
+    }
+    for(int i=0;i<DEBUG_MULTI;i++)
+    {
+        threads[i]->start();
+    }
+#endif
     return a.exec();
 }

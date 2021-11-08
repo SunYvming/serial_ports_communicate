@@ -61,12 +61,13 @@ void joinDialog::pushButton_clicked()
     if(wrong)
         return;
 
-    this->mainwindow=new MainWindow(this);
+    this->mainwindow=new MainWindow();
     if(!mainwindow->openSerialPort(ui->portBox->currentText()))
     {
         delete this->mainwindow;
         return;
     }
+    mainwindow->setUserName(ui->userNameEdit->text());
     mainwindow->show();
     this->hide();
 }
