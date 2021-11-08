@@ -2,6 +2,8 @@
 #include "ui_joindialog.h"
 
 #include <QDebug>
+#include <QPropertyAnimation>
+#include <QGraphicsOpacityEffect>
 
 joinDialog::joinDialog(QWidget *parent)
     : QDialog(parent)
@@ -10,9 +12,11 @@ joinDialog::joinDialog(QWidget *parent)
     ui->setupUi(this);
     ui->portErr->setStyleSheet("color:red;");
     ui->nameErr->setStyleSheet("color:red;");
-    this->setFixedSize(360,560);
+    ui->pushButton_2->setFlat(true);
+    this->setWindowFlags(Qt::FramelessWindowHint);
     connect(ui->portBox, SIGNAL(clicked()), this, SLOT(comboBox_clicked()));
     connect(ui->pushButton,SIGNAL(clicked()),this,SLOT(pushButton_clicked()));
+    connect(ui->pushButton_2,SIGNAL(clicked()),this,SLOT(pushButton_2_clicked()));
 }
 
 joinDialog::~joinDialog()
@@ -68,8 +72,59 @@ void joinDialog::pushButton_clicked()
         return;
     }
     mainwindow->setUserName(ui->userNameEdit->text());
-    mainwindow->show();
-    this->hide();
+
+    QPropertyAnimation *pScaleAnimation1 = new QPropertyAnimation(this, "geometry");
+    pScaleAnimation1->setDuration(200);
+    pScaleAnimation1->setStartValue(this->geometry());
+    pScaleAnimation1->setEndValue(QRect(this->geometry().topLeft(), QSize(0,this->size().height())));
+    pScaleAnimation1->start();
+    connect(pScaleAnimation1,&QPropertyAnimation::finished,pScaleAnimation1,[pScaleAnimation1,this]{
+        this->hide();
+        mainwindow->show();
+        delete pScaleAnimation1;
+    });
+
 }
 
+void joinDialog::mousePressEvent(QMouseEvent *event)
+{
+    if(event->button() == Qt::LeftButton)
+    {
+        m_bDrag = true;
+        mouseStartPoint = event->globalPos();
+        windowTopLeftPoint = this->frameGeometry().topLeft();
+    }
+}
+
+void joinDialog::mouseMoveEvent(QMouseEvent *event)
+{
+    if(m_bDrag)
+    {
+        QPoint distance = event->globalPos() - mouseStartPoint;
+        this->move(windowTopLeftPoint + distance);
+    }
+}
+
+void joinDialog::mouseReleaseEvent(QMouseEvent *event)
+{
+    if(event->button() == Qt::LeftButton)
+    {
+        m_bDrag = false;
+    }
+}
+
+
+
+void joinDialog::pushButton_2_clicked()
+{
+    QPropertyAnimation *pScaleAnimation1 = new QPropertyAnimation(this, "geometry");
+    pScaleAnimation1->setDuration(200);
+    pScaleAnimation1->setStartValue(this->geometry());
+    pScaleAnimation1->setEndValue(QRect(this->geometry().topLeft(), QSize(this->size().width(),0)));
+    pScaleAnimation1->start();
+    connect(pScaleAnimation1,&QPropertyAnimation::finished,pScaleAnimation1,[pScaleAnimation1,this]{
+        this->close();
+        delete pScaleAnimation1;
+    });
+}
 

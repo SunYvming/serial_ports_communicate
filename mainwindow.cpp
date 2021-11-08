@@ -67,11 +67,6 @@ void MainWindow::serial_receiveBeat(QString com,QString name,QString time)
     serialCom->write(Coder::encoder(Coder::Kind::Debug,this->serialCom->portName(),this->userName,nullptr,"Receive beat from "+com+":"+name+" at "+time));
 }
 
-void MainWindow::serial_writeData(const QByteArray &data)
-{
-
-}
-
 void MainWindow::timer_timeOut()
 {
     serialCom->write(Coder::encoder(Coder::Kind::Beat,this->serialCom->portName(),this->userName));

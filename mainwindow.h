@@ -32,7 +32,6 @@ private:
 
 private slots:
     void serial_readData();
-    void serial_writeData(const QByteArray &data);
     void timer_timeOut();
     void serial_receiveBeat(QString com,QString name,QString time);
 };
