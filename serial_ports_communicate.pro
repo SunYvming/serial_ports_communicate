@@ -10,7 +10,9 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    chatwidget.cpp \
     coder.cpp \
+    customwidget.cpp \
     debugthread.cpp \
     main.cpp \
     joindialog.cpp \
@@ -18,14 +20,19 @@ SOURCES += \
     mycombobox.cpp
 
 HEADERS += \
+    chatwidget.h \
     coder.h \
     config.h \
+    customwidget.h \
     debugthread.h \
     joindialog.h \
     mainwindow.h \
     mycombobox.h
 
+
 FORMS += \
+    chatwidget.ui \
+    customwidget.ui \
     joindialog.ui \
     mainwindow.ui
 

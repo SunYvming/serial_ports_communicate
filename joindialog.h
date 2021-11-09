@@ -41,9 +41,9 @@ private:
     Ui::joinDialog *ui;
     QList<QSerialPortInfo> avilablePort;
     MainWindow *mainwindow;
-    bool        m_bDrag;
-    QPoint      mouseStartPoint;
-    QPoint      windowTopLeftPoint;
+    bool m_bDrag;
+    QPoint mouseStartPoint;
+    QPoint windowTopLeftPoint;
 
 private slots:
     void comboBox_clicked();

@@ -10,8 +10,6 @@
 
 #include <QTime>
 
-Coder *coder=nullptr;
-
 Coder::Coder()
 {
 

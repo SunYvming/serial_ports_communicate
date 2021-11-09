@@ -6,6 +6,8 @@
 #include <QCloseEvent>
 
 #include "coder.h"
+#include "customwidget.h"
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -13,6 +15,11 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     coder=new Coder();
+    this->setBaseSize(QSize(1000,800));
+    ui->splitter->setStretchFactor(0,4);
+    ui->splitter->setStretchFactor(1,6);
+
+    connect(ui->customList,&QListWidget::itemClicked,this,&MainWindow::customList_itemClicked);
 }
 
 MainWindow::~MainWindow()
@@ -64,7 +71,39 @@ void MainWindow::serial_readData()
 
 void MainWindow::serial_receiveBeat(QString com,QString name,QString time)
 {
-    serialCom->write(Coder::encoder(Coder::Kind::Debug,this->serialCom->portName(),this->userName,nullptr,"Receive beat from "+com+":"+name+" at "+time));
+    //serialCom->write(Coder::encoder(Coder::Kind::Debug,this->serialCom->portName(),this->userName,nullptr,"Receive beat from "+com+":"+name+" at "+time));
+    emit customBeat(com);
+    foreach(CustomWidget *t,customs)
+    {
+        if(t->getCom()==com)
+        {
+            t->setName(name);
+            return;
+        }
+    }
+
+    CustomWidget *w = new CustomWidget(this);
+    w->setCom(com);
+    w->setName(name);
+    customs.append(w);
+    QListWidgetItem *item=new QListWidgetItem(ui->customList,0);
+    item->setSizeHint(QSize(60, 50));
+    ui->customList->addItem(item);
+    ui->customList->setItemWidget(item,w);
+    w->setLinkItem(item);
+    w->show();
+    connect(this,&MainWindow::customBeat,w,&CustomWidget::restartTimer);
+    connect(this,&MainWindow::customChanged,w,&CustomWidget::selectChanged);
+    connect(w,&CustomWidget::targetCustomChanged,ui->chatWidget,&ChatWidget::targetCustomChanged);
+    connect(w,&CustomWidget::customDisconnect,this,[this,w,item]{
+        customs.removeOne(w);
+        delete w;
+        ui->customList->removeItemWidget(item);
+        delete item;
+    });
+    connect(w,&CustomWidget::nameChanged,this,[this]{
+         ui->customList->update();
+    });
 }
 
 void MainWindow::timer_timeOut()
@@ -88,3 +127,9 @@ void MainWindow::closeEvent ( QCloseEvent * event )
     }
     event->accept();
 }
+
+void MainWindow::customList_itemClicked(QListWidgetItem *item)
+{
+    emit customChanged(item);
+}
+
