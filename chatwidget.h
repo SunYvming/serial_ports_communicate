@@ -21,6 +21,12 @@ public:
     void setTargetCustom(CustomWidget *newTargetCustom);
 public slots:
     void targetCustomChanged(CustomWidget *newTargetCustom);
+    void sendButton_clicked();
+    void listAppend(CustomWidget *target,log_t newLog);
+
+signals:
+    void writeData(QString com,QString name,QString time,QString body);
+    void customSend(QString com,QString name,QString time,QString body);
 
 
 private:

@@ -1,6 +1,9 @@
 #include "customwidget.h"
 #include "ui_customwidget.h"
 
+#include "mainwindow.h"
+
+
 CustomWidget::CustomWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::CustomWidget)
@@ -77,6 +80,26 @@ void CustomWidget::selectChanged(QListWidgetItem *item)
         }
     }
     else active=false;
+}
+
+void CustomWidget::getNewLog(log_t newLog)
+{
+    if((newLog.senderCom==com&&newLog.senderName==name&&newLog.receiverCom==thisCom&&newLog.receiverName==thisName)||
+       (newLog.receiverCom==com&&newLog.receiverName==name&&newLog.senderCom==thisCom&&newLog.senderName==thisName))
+    {
+        this->log.append(newLog);
+        emit logAppend(this,newLog);
+    }
+}
+
+void CustomWidget::setThisCom(const QString &newThisCom)
+{
+    thisCom = newThisCom;
+}
+
+void CustomWidget::setThisName(const QString &newThisName)
+{
+    thisName = newThisName;
 }
 
 

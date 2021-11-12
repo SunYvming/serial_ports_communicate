@@ -10,12 +10,14 @@
 
 #include <QTime>
 
+#include "customwidget.h"
+
 Coder::Coder()
 {
 
 }
 
-QByteArray Coder::encoder(Kind kind,QString senderCom,QString senderName,QString receiver,QString body)
+QByteArray Coder::encoder(Kind kind,QString senderCom,QString senderName,QString receiverCom,QString receiverName,QString body)
 {
     switch (kind)
     {
@@ -26,7 +28,7 @@ QByteArray Coder::encoder(Kind kind,QString senderCom,QString senderName,QString
             senderObject.insert("Name",senderName);
 
             QJsonObject bodyObject;
-            bodyObject.insert("Time",QDateTime::currentDateTime().toString("hh:mm:ss:zzz"));
+            bodyObject.insert("Time",QString::number(QDateTime::currentDateTimeUtc().toTime_t()));
             bodyObject.insert("Data","no data");
 
             QJsonObject object;
@@ -41,7 +43,27 @@ QByteArray Coder::encoder(Kind kind,QString senderCom,QString senderName,QString
         }break;
         case Kind::Message:
         {
-            return nullptr;
+            QJsonObject senderObject;
+            senderObject.insert("Com",senderCom);
+            senderObject.insert("Name",senderName);
+
+            QJsonObject receiveObject;
+            receiveObject.insert("Com",receiverCom);
+            receiveObject.insert("Name",receiverName);
+
+            QJsonObject bodyObject;
+            bodyObject.insert("Time",QString::number(QDateTime::currentDateTimeUtc().toTime_t()));
+            bodyObject.insert("Data",body);
+
+            QJsonObject object;
+            object.insert("Kind",QVariant::fromValue(kind).toString());
+            object.insert("Sender",senderObject);
+            object.insert("Receiver",receiveObject);
+            object.insert("Body",bodyObject);
+
+            QJsonDocument document;
+            document.setObject(object);
+            return document.toJson(QJsonDocument::Indented);
 
         }break;
         case Kind::Debug:
@@ -69,9 +91,13 @@ QByteArray Coder::encoder(Kind kind,QString senderCom,QString senderName,QString
 
 void Coder::decoder(QByteArray input)
 {
-    QString com;
-    QString name;
+    QString senderCom;
+    QString senderName;
+    QString receiverName;
+    QString receiverCom;
     QString time;
+    QString body;
+    static log_t newLog;
 
     QJsonParseError jsonError;
     QJsonDocument document = QJsonDocument::fromJson(input,&jsonError);
@@ -93,8 +119,8 @@ void Coder::decoder(QByteArray input)
                                     if(senderObject.contains("Com")&&senderObject.contains("Name"))
                                         if(senderObject.value("Com").isString()&&senderObject.value("Name").isString())
                                         {
-                                            com=senderObject.value("Com").toString();
-                                            name=senderObject.value("Name").toString();
+                                            senderCom=senderObject.value("Com").toString();
+                                            senderName=senderObject.value("Name").toString();
                                         }
                                         else return;
                                     else return;
@@ -113,9 +139,63 @@ void Coder::decoder(QByteArray input)
                                 }
                                 else return;
                             else {return;}
-                            emit coder_receiveBeat(com,name,time);
+                            emit coder_receiveBeat(senderCom,senderName,time);
                         }
-                        case Kind::Debug:break;
+                        case Kind::Message:
+                        {
+                            if(object.contains("Sender"))
+                                if(object.value("Sender").isObject())
+                                {
+                                    QJsonObject senderObject=object.value("Sender").toObject();
+                                    if(senderObject.contains("Com")&&senderObject.contains("Name"))
+                                        if(senderObject.value("Com").isString()&&senderObject.value("Name").isString())
+                                        {
+                                            senderCom=senderObject.value("Com").toString();
+                                            senderName=senderObject.value("Name").toString();
+                                        }
+                                        else return;
+                                    else return;
+                                }
+                                else return;
+                            else return;
+                            if(object.contains("Receiver"))
+                                if(object.value("Receiver").isObject())
+                                {
+                                    QJsonObject receiverObject=object.value("Receiver").toObject();
+                                    if(receiverObject.contains("Com")&&receiverObject.contains("Name"))
+                                        if(receiverObject.value("Com").isString()&&receiverObject.value("Name").isString())
+                                        {
+                                            receiverCom=receiverObject.value("Com").toString();
+                                            receiverName=receiverObject.value("Name").toString();
+                                        }
+                                        else return;
+                                    else return;
+                                }
+                                else return;
+                            else return;
+                            if(object.contains("Body"))
+                                if(object.value("Body").isObject())
+                                {
+                                    QJsonObject bodyObject=object.value("Body").toObject();
+                                    if(bodyObject.contains("Time")&&bodyObject.contains("Data"))
+                                        if(bodyObject.value("Time").isString()&&bodyObject.value("Data").isString())
+                                        {
+                                            time=bodyObject.value("Time").toString();
+                                            body=bodyObject.value("Data").toString();
+                                        }
+                                        else return;
+                                    else return;
+                                }
+                                else return;
+                            else {return;}
+                            newLog.senderCom=senderCom;
+                            newLog.senderName=senderName;
+                            newLog.receiverCom=receiverCom;
+                            newLog.receiverName=receiverName;
+                            newLog.time=time;
+                            newLog.body=body;
+                            emit coder_receiveMessage(newLog);
+                        }break;
                         default:break;
                     }
         }

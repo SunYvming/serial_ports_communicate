@@ -10,6 +10,16 @@ namespace Ui {
 class CustomWidget;
 }
 
+typedef struct
+{
+    QString senderCom;
+    QString senderName;
+    QString receiverCom;
+    QString receiverName;
+    QString time;
+    QString body;
+}log_t;
+
 class CustomWidget : public QWidget
 {
     Q_OBJECT
@@ -29,6 +39,12 @@ public:
 
     bool ifActive() const;
 
+    QList<log_t> log;
+
+    void setThisName(const QString &newThisName);
+
+    void setThisCom(const QString &newThisCom);
+
 public slots:
     void restartTimer(QString com)
     {
@@ -40,12 +56,14 @@ public slots:
     }
 
     void selectChanged(QListWidgetItem *item);
+    void getNewLog(log_t newLog);
+
 
 signals:
     void nameChanged();
     void customDisconnect();
-    void widgetActive();
     void targetCustomChanged(CustomWidget* targetCustom);
+    void logAppend(CustomWidget *custom,log_t newLog);
 
 
 
@@ -55,10 +73,13 @@ private:
     QString com;
     QTimer *timer;
 
+    QString thisName;
+    QString thisCom;
+
     bool active;
     //Read Only!!!
     QListWidgetItem *linkItem;
-    //log
+
 };
 
 #endif // CUSTOMWIDGET_H
