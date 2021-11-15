@@ -2,5 +2,8 @@
     <qresource prefix="/image">
         <file>wechat.png</file>
         <file>close.png</file>
+        <file>loading4.gif</file>
+        <file>Customer Copy.png</file>
+        <file>CustomerService.png</file>
     </qresource>
 </RCC>

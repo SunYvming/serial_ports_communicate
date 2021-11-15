@@ -28,6 +28,9 @@ signals:
     void writeData(QString com,QString name,QString time,QString body);
     void customSend(QString com,QString name,QString time,QString body);
 
+protected:
+    virtual void resizeEvent(QResizeEvent *event) override;
+
 
 private:
     Ui::ChatWidget *ui;

@@ -3,6 +3,8 @@
 
 #include "mainwindow.h"
 
+#include <QPainter>
+
 
 CustomWidget::CustomWidget(QWidget *parent) :
     QWidget(parent),
@@ -10,7 +12,7 @@ CustomWidget::CustomWidget(QWidget *parent) :
 {
     ui->setupUi(this);
     timer=new QTimer(this);
-    timer->start(3000);
+    timer->start(10000);
 
     active=false;
 
@@ -38,6 +40,16 @@ void CustomWidget::setName(const QString &newName)
         name = newName;
         emit nameChanged();
     }
+    QPixmap pixmap=QPixmap(50,50);
+    pixmap.fill(Qt::transparent);
+    QPainter painter(&pixmap);
+    painter.setBrush(QBrush(QColor(75,164,242)));
+    painter.setPen(Qt::white);
+    painter.drawEllipse(0,0,50,50);
+    painter.setPen(Qt::black);
+    painter.setFont(QFont("MicrosoftYaHei",15));
+    painter.drawText(pixmap.rect(), Qt::AlignCenter, name);
+    ui->cusIcon->setPixmap(pixmap);
 }
 
 const QString &CustomWidget::getCom() const
@@ -76,6 +88,11 @@ void CustomWidget::selectChanged(QListWidgetItem *item)
         else
         {
             active=true;
+            unreadCounter=0;
+            QPixmap pixmap=QPixmap(25,25);
+            pixmap.fill(Qt::transparent);
+            ui->countIcon->setPixmap(pixmap);
+            emit unreadChanged();
             emit targetCustomChanged(this);
         }
     }
@@ -89,7 +106,33 @@ void CustomWidget::getNewLog(log_t newLog)
     {
         this->log.append(newLog);
         emit logAppend(this,newLog);
+        if(!active)
+        {
+            unreadCounter++;
+            QPixmap pixmap=QPixmap(25,25);
+            pixmap.fill(Qt::transparent);
+            QPainter painter(&pixmap);
+            painter.setBrush(Qt::red);
+            painter.setPen(Qt::white);
+            painter.drawEllipse(0,0,25,25);
+            painter.setPen(Qt::black);
+            painter.setFont(QFont("MicrosoftYaHei",10));
+            painter.drawText(pixmap.rect(), Qt::AlignCenter, QString::number(unreadCounter));
+            ui->countIcon->setPixmap(pixmap);
+
+            emit unreadChanged();
+        }
     }
+}
+
+const QString &CustomWidget::getThisCom() const
+{
+    return thisCom;
+}
+
+const QString &CustomWidget::getThisName() const
+{
+    return thisName;
 }
 
 void CustomWidget::setThisCom(const QString &newThisCom)

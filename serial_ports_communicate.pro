@@ -17,7 +17,8 @@ SOURCES += \
     main.cpp \
     joindialog.cpp \
     mainwindow.cpp \
-    mycombobox.cpp
+    mycombobox.cpp \
+    qnchatmessage.cpp
 
 HEADERS += \
     chatwidget.h \
@@ -27,7 +28,8 @@ HEADERS += \
     debugthread.h \
     joindialog.h \
     mainwindow.h \
-    mycombobox.h
+    mycombobox.h \
+    qnchatmessage.h
 
 
 FORMS += \

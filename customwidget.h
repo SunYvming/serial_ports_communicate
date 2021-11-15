@@ -45,13 +45,17 @@ public:
 
     void setThisCom(const QString &newThisCom);
 
+    const QString &getThisName() const;
+
+    const QString &getThisCom() const;
+
 public slots:
     void restartTimer(QString com)
     {
         if(this->com==com)
             if(timer!=nullptr)
             {
-                timer->setInterval(3000);
+                timer->setInterval(10000);
             }
     }
 
@@ -61,6 +65,7 @@ public slots:
 
 signals:
     void nameChanged();
+    void unreadChanged();
     void customDisconnect();
     void targetCustomChanged(CustomWidget* targetCustom);
     void logAppend(CustomWidget *custom,log_t newLog);
@@ -79,6 +84,8 @@ private:
     bool active;
     //Read Only!!!
     QListWidgetItem *linkItem;
+
+    int unreadCounter=0;
 
 };
 

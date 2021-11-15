@@ -15,9 +15,11 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     coder=new Coder();
-    this->setBaseSize(QSize(1000,800));
+    this->resize(QSize(1000,600));
     ui->splitter->setStretchFactor(0,4);
     ui->splitter->setStretchFactor(1,6);
+    ui->customList->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    ui->customList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     connect(ui->customList,&QListWidget::itemClicked,this,&MainWindow::customList_itemClicked);
     connect(coder,&Coder::coder_receiveMessage,this,&MainWindow::customMessageRead);
@@ -98,7 +100,7 @@ void MainWindow::serial_receiveBeat(QString com,QString name,QString time)
     w->setThisName(getUserName());
     customs.append(w);
     QListWidgetItem *item=new QListWidgetItem(ui->customList,0);
-    item->setSizeHint(QSize(60, 50));
+    item->setSizeHint(QSize(180, 50));
     ui->customList->addItem(item);
     ui->customList->setItemWidget(item,w);
     w->setLinkItem(item);
@@ -114,6 +116,9 @@ void MainWindow::serial_receiveBeat(QString com,QString name,QString time)
         delete w;
         ui->customList->removeItemWidget(item);
         delete item;
+    });
+    connect(w,&CustomWidget::unreadChanged,this,[this]{
+        ui->customList->update();
     });
     connect(w,&CustomWidget::nameChanged,this,[this]{
          ui->customList->update();
