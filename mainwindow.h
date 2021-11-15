@@ -43,6 +43,8 @@ private:
     QString userName;
     QList<CustomWidget*> customs;
     Coder *coder;
+    QByteArray buffer;
+    bool flag=false;
 
 
 private slots:

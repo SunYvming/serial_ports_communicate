@@ -71,8 +71,7 @@ void MainWindow::setUserName(const QString &newUserName)
 
 void MainWindow::serial_readData()
 {
-    static QByteArray buffer;
-    static bool flag=false;
+
     QByteArray buf=serialCom->readAll();
 
     QByteArray buf_before;
