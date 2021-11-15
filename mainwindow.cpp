@@ -71,13 +71,78 @@ void MainWindow::setUserName(const QString &newUserName)
 
 void MainWindow::serial_readData()
 {
-    coder->decoder(serialCom->readAll());
+    static QByteArray buffer;
+    static bool flag=false;
+    QByteArray buf=serialCom->readAll();
+
+    QByteArray buf_before;
+    QByteArray buf_after;
+
+    if(buf.contains(QString("$").toLatin1())&&buf.contains(QString("#").toLatin1()))
+    {
+        if(buf.indexOf('#')<buf.indexOf('$'))
+        {
+            buffer.clear();
+            buf.remove(0,buf.indexOf('#')+1);
+            buffer.append(buf.left(buf.indexOf('$')));
+            coder->decoder(buffer);
+            buffer.clear();
+            flag=false;
+        }
+        else
+        {
+            buf_before.append(buf.left(buf.indexOf('$')));
+            buf_after.append(buf.right(buf.length()-buf.indexOf('#')-1));
+            if(flag)
+            {
+                buffer.append(buf_before);
+                coder->decoder(buffer);
+                buffer.clear();
+                buffer.append(buf_after);
+            }
+            else
+            {
+                buffer.clear();
+                buffer.append(buf_after);
+                flag=true;
+            }
+        }
+    }
+    else if(buf.contains(QString("$").toLatin1()))
+    {
+        if(flag)
+        {
+            buffer.append(buf.left(buf.indexOf('$')));
+            coder->decoder(buffer);
+            buffer.clear();
+            flag=false;
+        }
+        else
+        {
+            buffer.clear();
+        }
+    }
+    else if(buf.contains(QString("#").toLatin1()))
+    {
+        buffer.clear();
+        flag=true;
+        buffer.append(buf.right(buf.length()-buf.indexOf('#')-1));
+    }
+    else
+    {
+        if(flag)
+            buffer.append(buf);
+        else
+            buffer.clear();
+    }
 }
 
 void MainWindow::serial_writeData(QString com,QString name,QString time,QString body)
 {
     QByteArray data=Coder::encoder(Coder::Kind::Message,this->serialCom->portName(),this->getUserName(),com,name,body);
+    serialCom->write(QString('#').toLatin1());
     serialCom->write(data);
+    serialCom->write(QString('$').toLatin1());
 }
 
 void MainWindow::serial_receiveBeat(QString com,QString name,QString time)
@@ -127,7 +192,9 @@ void MainWindow::serial_receiveBeat(QString com,QString name,QString time)
 
 void MainWindow::timer_timeOut()
 {
+    serialCom->write(QString('#').toLatin1());
     serialCom->write(Coder::encoder(Coder::Kind::Beat,this->serialCom->portName(),this->userName));
+    serialCom->write(QString('$').toLatin1());
 }
 
 void MainWindow::closeEvent ( QCloseEvent * event )

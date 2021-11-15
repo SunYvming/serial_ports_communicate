@@ -9,6 +9,8 @@
 #include <QMetaEnum>
 
 #include <QTime>
+#include <QDebug>
+#include <QTextCodec>
 
 #include "customwidget.h"
 
@@ -121,6 +123,7 @@ void Coder::decoder(QByteArray input)
                                         {
                                             senderCom=senderObject.value("Com").toString();
                                             senderName=senderObject.value("Name").toString();
+
                                         }
                                         else return;
                                     else return;
