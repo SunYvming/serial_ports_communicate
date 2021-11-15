@@ -2,8 +2,6 @@
 #include "debugthread.h"
 #include "joindialog.h"
 
-#include <windows.h>
-
 #include <QApplication>
 #include <QLocale>
 #include <QTranslator>
