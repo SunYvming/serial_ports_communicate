@@ -16,13 +16,14 @@ public:
     {
         Beat,
         Message,
-        Debug
+        Debug,
+        File
     };
     Q_ENUM(Kind)
 
     Coder();
-    static QByteArray encoder(Kind kind,QString senderCom=nullptr,QString senderName=nullptr,QString receiverCom=nullptr,QString receiverName=nullptr,QString body=nullptr);
-    void decoder(QByteArray input);
+    static QByteArray encoder(Kind kind,QString senderCom=nullptr,QString senderName=nullptr,QString receiverCom=nullptr,QString receiverName=nullptr,QString body=nullptr,QString fileName=nullptr);
+    void decoder(QByteArray input,QString thisname=nullptr);
 
 signals:
     void coder_receiveBeat(QString com,QString name,QString time);

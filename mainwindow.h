@@ -7,9 +7,12 @@
 #include <QSerialPort>
 #include <QTimer>
 #include <QListWidgetItem>
+#include <QStack>
 
 #include "customwidget.h"
 #include "coder.h"
+
+
 
 namespace Ui {
 class MainWindow;
@@ -28,6 +31,7 @@ public:
     const QString &getUserName() const;
     void setUserName(const QString &newUserName);
     virtual void closeEvent (QCloseEvent * event);
+    bool block=false;
 
 
 signals:
@@ -43,6 +47,7 @@ private:
     QString userName;
     QList<CustomWidget*> customs;
     Coder *coder;
+    QStack<QByteArray> stack;
     QByteArray buffer;
     bool flag=false;
 
@@ -54,6 +59,7 @@ private slots:
     void serial_receiveBeat(QString com,QString name,QString time);
     void customList_itemClicked(QListWidgetItem *item);
     void customMessageSend(QString com,QString name,QString time,QString body);
+    void serial_writeFile(QString com, QString name, QString time, QString body,QString fileName);
 };
 
 #endif // MAINWINDOW_H

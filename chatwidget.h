@@ -23,14 +23,15 @@ public slots:
     void targetCustomChanged(CustomWidget *newTargetCustom);
     void sendButton_clicked();
     void listAppend(CustomWidget *target,log_t newLog);
+    void fileButton_clicked();
 
 signals:
     void writeData(QString com,QString name,QString time,QString body);
+    void writeFile(QString com,QString name,QString time,QString body,QString fileName);
     void customSend(QString com,QString name,QString time,QString body);
 
 protected:
     virtual void resizeEvent(QResizeEvent *event) override;
-
 
 private:
     Ui::ChatWidget *ui;

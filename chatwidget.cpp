@@ -5,6 +5,14 @@
 #include <QDebug>
 #include <QPainter>
 
+#include <QMimeDatabase>
+#include <QMimeData>
+
+#include <QBuffer>
+#include <QFile>
+
+#include <QFileDialog>
+
 #include "qnchatmessage.h"
 
 ChatWidget::ChatWidget(QWidget *parent) :
@@ -20,6 +28,7 @@ ChatWidget::ChatWidget(QWidget *parent) :
     ui->splitter->setStretchFactor(1,2);
     this->targetCustom=nullptr;
     connect(ui->sendButton,&QPushButton::clicked,this,&ChatWidget::sendButton_clicked);
+    connect(ui->fileButton,&QPushButton::clicked,this,&ChatWidget::fileButton_clicked);
 }
 
 ChatWidget::~ChatWidget()
@@ -197,5 +206,24 @@ void ChatWidget::resizeEvent(QResizeEvent *event)
         ui->logListWidget->setItemWidget(item, messageW);
     }
     ui->logListWidget->setCurrentRow(ui->logListWidget->count()-1);
+}
+
+
+void ChatWidget::fileButton_clicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "./",QString(tr("All (*.*)")));
+    QFile *file=new QFile(fileName,this);
+    if (!file->open(QIODevice::ReadOnly))
+        return;
+    QFileInfo fileInfo(*file);
+
+    QString data=QString::fromUtf8(file->readAll().toBase64());
+
+    QString name=fileInfo.fileName();
+
+    file->close();
+    delete file;
+    emit customSend(this->targetCustom->getCom(),this->targetCustom->getName(),QString::number(QDateTime::currentDateTimeUtc().toTime_t()),name);
+    emit writeFile(this->targetCustom->getCom(),this->targetCustom->getName(),QString::number(QDateTime::currentDateTimeUtc().toTime_t()),data,name);
 }
 
