@@ -106,8 +106,8 @@ QByteArray Coder::encoder(Kind kind,QString senderCom,QString senderName,QString
             bodyObject.insert("Time",QString::number(QDateTime::currentDateTimeUtc().toTime_t()));
             bodyObject.insert("FileName",fileName);
             bodyObject.insert("Data",body);
-            bodyObject.insert("Number",number);
-            bodyObject.insert("Count",count);
+            bodyObject.insert("Number",QString::number(number));
+            bodyObject.insert("Count",QString::number(count));
 
             QJsonObject object;
             object.insert("Kind",QVariant::fromValue(kind).toString());
@@ -149,93 +149,6 @@ void Coder::decoder(QByteArray input,QString thisName)
                 if(object.value("Kind").isString())
                     switch (Kind(QMetaEnum::fromType<Coder::Kind>().keysToValue(object.value("Kind").toString().toLatin1())))
                     {
-                        case Kind::Beat:
-                        {
-                            if(object.contains("Sender"))
-                                if(object.value("Sender").isObject())
-                                {
-                                    QJsonObject senderObject=object.value("Sender").toObject();
-                                    if(senderObject.contains("Com")&&senderObject.contains("Name"))
-                                        if(senderObject.value("Com").isString()&&senderObject.value("Name").isString())
-                                        {
-                                            senderCom=senderObject.value("Com").toString();
-                                            senderName=senderObject.value("Name").toString();
-
-                                        }
-                                        else return;
-                                    else return;
-                                }
-                                else return;
-                            else return;
-                            if(object.contains("Body"))
-                                if(object.value("Body").isObject())
-                                {
-                                    QJsonObject bodyObject=object.value("Body").toObject();
-                                    if(bodyObject.contains("Time"))
-                                        if(bodyObject.value("Time").isString())
-                                            time=bodyObject.value("Time").toString();
-                                        else return;
-                                    else return;
-                                }
-                                else return;
-                            else {return;}
-                            emit coder_receiveBeat(senderCom,senderName,time);
-                        }
-                        case Kind::Message:
-                        {
-                            if(object.contains("Sender"))
-                                if(object.value("Sender").isObject())
-                                {
-                                    QJsonObject senderObject=object.value("Sender").toObject();
-                                    if(senderObject.contains("Com")&&senderObject.contains("Name"))
-                                        if(senderObject.value("Com").isString()&&senderObject.value("Name").isString())
-                                        {
-                                            senderCom=senderObject.value("Com").toString();
-                                            senderName=senderObject.value("Name").toString();
-                                        }
-                                        else return;
-                                    else return;
-                                }
-                                else return;
-                            else return;
-                            if(object.contains("Receiver"))
-                                if(object.value("Receiver").isObject())
-                                {
-                                    QJsonObject receiverObject=object.value("Receiver").toObject();
-                                    if(receiverObject.contains("Com")&&receiverObject.contains("Name"))
-                                        if(receiverObject.value("Com").isString()&&receiverObject.value("Name").isString())
-                                        {
-                                            receiverCom=receiverObject.value("Com").toString();
-                                            receiverName=receiverObject.value("Name").toString();
-                                        }
-                                        else return;
-                                    else return;
-                                }
-                                else return;
-                            else return;
-                            if(object.contains("Body"))
-                                if(object.value("Body").isObject())
-                                {
-                                    QJsonObject bodyObject=object.value("Body").toObject();
-                                    if(bodyObject.contains("Time")&&bodyObject.contains("Data"))
-                                        if(bodyObject.value("Time").isString()&&bodyObject.value("Data").isString())
-                                        {
-                                            time=bodyObject.value("Time").toString();
-                                            body=bodyObject.value("Data").toString();
-                                        }
-                                        else return;
-                                    else return;
-                                }
-                                else return;
-                            else {return;}
-                            newLog.senderCom=senderCom;
-                            newLog.senderName=senderName;
-                            newLog.receiverCom=receiverCom;
-                            newLog.receiverName=receiverName;
-                            newLog.time=time;
-                            newLog.body=body;
-                            emit coder_receiveMessage(newLog);
-                        }break;
                         case Kind::File:
                         {
                             if(object.contains("Sender"))
@@ -268,21 +181,21 @@ void Coder::decoder(QByteArray input,QString thisName)
                                 }
                                 else return;
                             else return;
+
                             if(object.contains("Body"))
                                 if(object.value("Body").isObject())
                                 {
-                                    qDebug()<<"inter"<<endl;
+
                                     QJsonObject bodyObject=object.value("Body").toObject();
-                                    if(bodyObject.contains("Time")&&bodyObject.contains("Data")&&bodyObject.contains("FileName")&&bodyObject.contains("Number")&&bodyObject.contains("Count"))
+                                    if(bodyObject.contains("Time")&&bodyObject.contains("Data")&&bodyObject.contains("FileName"))
                                         if(bodyObject.value("Time").isString()&&bodyObject.value("Data").isString()&&bodyObject.value("FileName").isString())
                                         {
                                             time=bodyObject.value("Time").toString();
                                             fileName=bodyObject.value("FileName").toString();
                                             body=bodyObject.value("Data").toString();
-
                                             if(receiverName==thisName)
                                             {
-                                                qDebug()<<"包:"+QString::number(bodyObject.value("Number").toInt())+"共:"+bodyObject.value("Count").toInt()<<endl;
+                                                qDebug()<<"包:"+bodyObject.value("Number").toString()+"共:"+bodyObject.value("Count").toString()<<endl;
                                                 if(bodyObject.value("Number").toInt()!=bodyObject.value("Count").toInt())
                                                 {
                                                     qDebug()<<'1'<<endl;
@@ -342,7 +255,95 @@ void Coder::decoder(QByteArray input,QString thisName)
                             newLog.time=time;
                             newLog.body=body;
                             emit coder_receiveMessage(newLog);
-                        }
+                        }break;
+                        case Kind::Beat:
+                        {
+                            if(object.contains("Sender"))
+                                if(object.value("Sender").isObject())
+                                {
+                                    QJsonObject senderObject=object.value("Sender").toObject();
+                                    if(senderObject.contains("Com")&&senderObject.contains("Name"))
+                                        if(senderObject.value("Com").isString()&&senderObject.value("Name").isString())
+                                        {
+                                            senderCom=senderObject.value("Com").toString();
+                                            senderName=senderObject.value("Name").toString();
+
+                                        }
+                                        else return;
+                                    else return;
+                                }
+                                else return;
+                            else return;
+                            if(object.contains("Body"))
+                                if(object.value("Body").isObject())
+                                {
+                                    QJsonObject bodyObject=object.value("Body").toObject();
+                                    if(bodyObject.contains("Time"))
+                                        if(bodyObject.value("Time").isString())
+                                            time=bodyObject.value("Time").toString();
+                                        else return;
+                                    else return;
+                                }
+                                else return;
+                            else {return;}
+                            emit coder_receiveBeat(senderCom,senderName,time);
+                        }break;
+                        case Kind::Message:
+                        {
+                            if(object.contains("Sender"))
+                                if(object.value("Sender").isObject())
+                                {
+                                    QJsonObject senderObject=object.value("Sender").toObject();
+                                    if(senderObject.contains("Com")&&senderObject.contains("Name"))
+                                        if(senderObject.value("Com").isString()&&senderObject.value("Name").isString())
+                                        {
+                                            senderCom=senderObject.value("Com").toString();
+                                            senderName=senderObject.value("Name").toString();
+                                        }
+                                        else return;
+                                    else return;
+                                }
+                                else return;
+                            else return;
+                            if(object.contains("Receiver"))
+                                if(object.value("Receiver").isObject())
+                                {
+                                    QJsonObject receiverObject=object.value("Receiver").toObject();
+                                    if(receiverObject.contains("Com")&&receiverObject.contains("Name"))
+                                        if(receiverObject.value("Com").isString()&&receiverObject.value("Name").isString())
+                                        {
+                                            receiverCom=receiverObject.value("Com").toString();
+                                            receiverName=receiverObject.value("Name").toString();
+                                        }
+                                        else return;
+                                    else return;
+                                }
+                                else return;
+                            else return;
+                            if(object.contains("Body"))
+                                if(object.value("Body").isObject())
+                                {
+                                    QJsonObject bodyObject=object.value("Body").toObject();
+                                    if(bodyObject.contains("Time")&&bodyObject.contains("Data"))
+                                        if(bodyObject.value("Time").isString()&&bodyObject.value("Data").isString())
+                                        {
+                                            time=bodyObject.value("Time").toString();
+                                            body=bodyObject.value("Data").toString();
+                                        }
+                                        else return;
+                                    else return;
+                                }
+                                else return;
+                            else {return;}
+                            newLog.senderCom=senderCom;
+                            newLog.senderName=senderName;
+                            newLog.receiverCom=receiverCom;
+                            newLog.receiverName=receiverName;
+                            newLog.time=time;
+                            newLog.body=body;
+                            emit coder_receiveMessage(newLog);
+                        }break;
+
                         default:break;
                     }
         }
