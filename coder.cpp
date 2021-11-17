@@ -24,7 +24,7 @@ Coder::Coder()
 
 }
 
-QByteArray Coder::encoder(Kind kind,QString senderCom,QString senderName,QString receiverCom,QString receiverName,QString body,QString fileName)
+QByteArray Coder::encoder(Kind kind,QString senderCom,QString senderName,QString receiverCom,QString receiverName,QString body,QString fileName,int number,int count)
 {
     switch (kind)
     {
@@ -106,6 +106,8 @@ QByteArray Coder::encoder(Kind kind,QString senderCom,QString senderName,QString
             bodyObject.insert("Time",QString::number(QDateTime::currentDateTimeUtc().toTime_t()));
             bodyObject.insert("FileName",fileName);
             bodyObject.insert("Data",body);
+            bodyObject.insert("Number",number);
+            bodyObject.insert("Count",count);
 
             QJsonObject object;
             object.insert("Kind",QVariant::fromValue(kind).toString());
@@ -269,15 +271,35 @@ void Coder::decoder(QByteArray input,QString thisName)
                             if(object.contains("Body"))
                                 if(object.value("Body").isObject())
                                 {
+                                    qDebug()<<"inter"<<endl;
                                     QJsonObject bodyObject=object.value("Body").toObject();
-                                    if(bodyObject.contains("Time")&&bodyObject.contains("Data")&&bodyObject.contains("FileName"))
+                                    if(bodyObject.contains("Time")&&bodyObject.contains("Data")&&bodyObject.contains("FileName")&&bodyObject.contains("Number")&&bodyObject.contains("Count"))
                                         if(bodyObject.value("Time").isString()&&bodyObject.value("Data").isString()&&bodyObject.value("FileName").isString())
                                         {
                                             time=bodyObject.value("Time").toString();
                                             fileName=bodyObject.value("FileName").toString();
                                             body=bodyObject.value("Data").toString();
+
                                             if(receiverName==thisName)
                                             {
+                                                qDebug()<<"包:"+QString::number(bodyObject.value("Number").toInt())+"共:"+bodyObject.value("Count").toInt()<<endl;
+                                                if(bodyObject.value("Number").toInt()!=bodyObject.value("Count").toInt())
+                                                {
+                                                    qDebug()<<'1'<<endl;
+                                                    foreach(file_t t,list)
+                                                    {
+                                                        if(t.name==fileName)
+                                                        {
+                                                            t.buffer.append(body);
+                                                            return;
+                                                        }
+                                                    }
+                                                    file_t newFile;
+                                                    newFile.buffer.append(body);
+                                                    newFile.name=fileName;
+                                                    list.append(newFile);
+                                                    return;
+                                                }
                                                 dir=new QDir;
                                                 if(!dir->exists("./"+thisName))
                                                 {
@@ -285,7 +307,18 @@ void Coder::decoder(QByteArray input,QString thisName)
                                                 }
                                                 file=new QFile("./"+thisName+"/"+fileName);
 
-                                                QByteArray fileData=QByteArray::fromBase64(body.toUtf8());
+                                                file_t targetFile;
+                                                targetFile.name=fileName;
+                                                for(int i=0;i<list.length();i++)
+                                                {
+                                                    if(list.at(i).name==fileName)
+                                                    {
+                                                        targetFile.buffer=list.at(i).buffer;
+                                                        targetFile.buffer.append(body);
+                                                        list.removeAt(i);
+                                                    }
+                                                }
+                                                QByteArray fileData=QByteArray::fromBase64(targetFile.buffer.toUtf8());
                                                 if(file->open(QFile::WriteOnly))
                                                 {
                                                     file->write(fileData);

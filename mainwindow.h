@@ -47,7 +47,6 @@ private:
     QString userName;
     QList<CustomWidget*> customs;
     Coder *coder;
-    QStack<QByteArray> stack;
     QByteArray buffer;
     bool flag=false;
 
@@ -59,7 +58,7 @@ private slots:
     void serial_receiveBeat(QString com,QString name,QString time);
     void customList_itemClicked(QListWidgetItem *item);
     void customMessageSend(QString com,QString name,QString time,QString body);
-    void serial_writeFile(QString com, QString name, QString time, QString body,QString fileName);
+    void serial_writeFile(QString com, QString name, QString time, QString body,QString fileName,int number,int count);
 };
 
 #endif // MAINWINDOW_H

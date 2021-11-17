@@ -29,6 +29,11 @@ ChatWidget::ChatWidget(QWidget *parent) :
     this->targetCustom=nullptr;
     connect(ui->sendButton,&QPushButton::clicked,this,&ChatWidget::sendButton_clicked);
     connect(ui->fileButton,&QPushButton::clicked,this,&ChatWidget::fileButton_clicked);
+
+    timer=new QTimer(this);
+    timer->start(1000);
+    connect(this->timer,&QTimer::timeout,this,&ChatWidget::timer_timeout);
+
 }
 
 ChatWidget::~ChatWidget()
@@ -221,9 +226,34 @@ void ChatWidget::fileButton_clicked()
 
     QString name=fileInfo.fileName();
 
+    int length=data.length();
+
+    for(int i=1;i<=(length/3000)+1;i++)
+    {
+        signal_to_emit_t newSignal;
+        newSignal.com=this->targetCustom->getCom();
+        newSignal.name=this->targetCustom->getName();
+        newSignal.time=QDateTime::currentDateTimeUtc().toTime_t();
+        newSignal.body=data.left(3000);
+        data.remove(0,3000);
+        newSignal.number=i;
+        newSignal.total=(length/3000)+1;
+        newSignal.fileName=name;
+        signal_to_emit.enqueue(newSignal);
+    }
+
     file->close();
     delete file;
     emit customSend(this->targetCustom->getCom(),this->targetCustom->getName(),QString::number(QDateTime::currentDateTimeUtc().toTime_t()),name);
-    emit writeFile(this->targetCustom->getCom(),this->targetCustom->getName(),QString::number(QDateTime::currentDateTimeUtc().toTime_t()),data,name);
+
+}
+
+void ChatWidget::timer_timeout()
+{
+    if(!signal_to_emit.isEmpty())
+    {
+        signal_to_emit_t newSignal=signal_to_emit.dequeue();
+        emit writeFile(newSignal.com,newSignal.name,newSignal.time,newSignal.body,newSignal.fileName,newSignal.number,newSignal.total);
+    }
 }
 
