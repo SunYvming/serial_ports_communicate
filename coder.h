@@ -29,6 +29,4 @@ signals:
     void coder_receiveMessage(log_t newLog);
 };
 
-extern Coder *coder;
-
 #endif // CODER_H
