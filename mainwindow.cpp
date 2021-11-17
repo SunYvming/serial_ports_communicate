@@ -85,7 +85,7 @@ void MainWindow::serial_readData()
             buffer.clear();
             buf.remove(0,buf.indexOf('#')+1);
             buffer.append(buf.left(buf.indexOf('$')));
-            coder->decoder(buffer);
+            coder->decoder(buffer,getUserName());
             buffer.clear();
             flag=false;
         }
@@ -96,7 +96,7 @@ void MainWindow::serial_readData()
             if(flag)
             {
                 buffer.append(buf_before);
-                coder->decoder(buffer);
+                coder->decoder(buffer,getUserName());
                 buffer.clear();
                 buffer.append(buf_after);
             }
@@ -113,7 +113,7 @@ void MainWindow::serial_readData()
         if(flag)
         {
             buffer.append(buf.left(buf.indexOf('$')));
-            coder->decoder(buffer);
+            coder->decoder(buffer,getUserName());
             buffer.clear();
             flag=false;
         }

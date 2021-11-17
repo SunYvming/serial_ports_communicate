@@ -195,8 +195,8 @@ void Coder::decoder(QByteArray input,QString thisName)
                                             body=bodyObject.value("Data").toString();
                                             if(receiverName==thisName)
                                             {
-                                                qDebug()<<"包:"+bodyObject.value("Number").toString()+"共:"+bodyObject.value("Count").toString()<<endl;
-                                                if(bodyObject.value("Number").toInt()!=bodyObject.value("Count").toInt())
+                                                qDebug()<<bodyObject.value("Number").toString()<<endl<<bodyObject.value("Count").toString()<<endl;
+                                                if(bodyObject.value("Number").toString()!=bodyObject.value("Count").toString())
                                                 {
                                                     qDebug()<<'1'<<endl;
                                                     foreach(file_t t,list)
