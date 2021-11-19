@@ -31,7 +31,7 @@ ChatWidget::ChatWidget(QWidget *parent) :
     connect(ui->fileButton,&QPushButton::clicked,this,&ChatWidget::fileButton_clicked);
 
     timer=new QTimer(this);
-    timer->start(1000);
+    timer->start(25);
     connect(this->timer,&QTimer::timeout,this,&ChatWidget::timer_timeout);
 
 }
@@ -226,6 +226,17 @@ void ChatWidget::fileButton_clicked()
 
     QString name=fileInfo.fileName();
 
+    QFile *logFile=new QFile("./logWriteFile.txt");
+    logFile->open(QFile::Append|QFile::Text);
+    logFile->write(name.toUtf8());
+    logFile->write("\n");
+    logFile->write(data.toUtf8());
+    logFile->close();
+    delete logFile;
+
+    QFile *testFile=new QFile("./"+name);
+    testFile->open(QFile::WriteOnly);
+
     int length=data.length();
 
     for(int i=1;i<=(length/3000)+1;i++)
@@ -240,7 +251,11 @@ void ChatWidget::fileButton_clicked()
         newSignal.total=(length/3000)+1;
         newSignal.fileName=name;
         signal_to_emit.enqueue(newSignal);
+        testFile->write(QByteArray::fromBase64(newSignal.body.toUtf8()));
     }
+
+    testFile->close();
+    delete testFile;
 
     file->close();
     delete file;

@@ -39,6 +39,7 @@ bool MainWindow::openSerialPort(QString portName)
     serialCom->setParity(QSerialPort::NoParity);
     serialCom->setStopBits(QSerialPort::OneStop);
     serialCom->setFlowControl(QSerialPort::NoFlowControl);
+    serialCom->setReadBufferSize(5000);
 
     if(serialCom->open(QSerialPort::ReadWrite))
     {
@@ -73,68 +74,95 @@ void MainWindow::setUserName(const QString &newUserName)
 void MainWindow::serial_readData()
 {
 
-    QByteArray buf=serialCom->readAll();
+    buffer.append(serialCom->readAll());
+    QList<QByteArray> list=buffer.split('#');
+    buffer.clear();
+    foreach(QByteArray t,list)
+    {
+        if(t.endsWith('$'))
+        {
+            t.remove(t.length()-1,1);
+            coder->decoder(t,getUserName());
+            list.removeOne(t);
+        }
+        else
+        {
+            buffer.append('#');
+            buffer.append(t);
+        }
+    }
 
-    QByteArray buf_before;
-    QByteArray buf_after;
 
-    if(buf.contains(QString("$").toLatin1())&&buf.contains(QString("#").toLatin1()))
-    {
-        if(buf.indexOf('#')<buf.indexOf('$'))
-        {
-            buffer.clear();
-            buf.remove(0,buf.indexOf('#')+1);
-            buffer.append(buf.left(buf.indexOf('$')));
-            coder->decoder(buffer,getUserName());
-            buffer.clear();
-            flag=false;
-        }
-        else
-        {
-            buf_before.append(buf.left(buf.indexOf('$')));
-            buf_after.append(buf.right(buf.length()-buf.indexOf('#')-1));
-            if(flag)
-            {
-                buffer.append(buf_before);
-                coder->decoder(buffer,getUserName());
-                buffer.clear();
-                buffer.append(buf_after);
-            }
-            else
-            {
-                buffer.clear();
-                buffer.append(buf_after);
-                flag=true;
-            }
-        }
-    }
-    else if(buf.contains(QString("$").toLatin1()))
-    {
-        if(flag)
-        {
-            buffer.append(buf.left(buf.indexOf('$')));
-            coder->decoder(buffer,getUserName());
-            buffer.clear();
-            flag=false;
-        }
-        else
-        {
-            buffer.clear();
-        }
-    }
-    else if(buf.contains(QString("#").toLatin1()))
-    {
-        buffer.clear();
-        flag=true;
-        buffer.append(buf.right(buf.length()-buf.indexOf('#')-1));
-    }
-    else
-    {
-        if(flag)
-            buffer.append(buf);
-        else
-            buffer.clear();
-    }
+//    QByteArray buf=serialCom->readAll();
+//    QByteArray buf_before;
+//    QByteArray buf_after;
+
+//    if(buf.contains(QString("$").toLatin1())&&buf.contains(QString("#").toLatin1()))
+//    {
+//        if(buf.indexOf('#')<buf.indexOf('$'))
+//        {
+//            buffer.clear();
+//            buf.remove(0,buf.indexOf('#')+1);
+//            buffer.append(buf.left(buf.indexOf('$')));
+//            coder->decoder(buffer,getUserName());
+//            qDebug()<<"length:"<<buffer.length();
+//            if(buffer.length()>1000)
+//                qDebug()<<buffer;
+//            buffer.clear();
+//            flag=false;
+//        }
+//        else
+//        {
+//            buf_before.append(buf.left(buf.indexOf('$')));
+//            buf_after.append(buf.right(buf.length()-buf.indexOf('#')-1));
+//            if(flag)
+//            {
+//                buffer.append(buf_before);
+//                coder->decoder(buffer,getUserName());
+//                qDebug()<<"length:"<<buffer.length();
+//                if(buffer.length()>1000)
+//                    qDebug()<<buffer;
+//                buffer.clear();
+//                buffer.append(buf_after);
+//            }
+//            else
+//            {
+//                buffer.clear();
+//                buffer.append(buf_after);
+//                flag=true;
+//            }
+//        }
+//    }
+//    else if(buf.contains(QString("$").toLatin1()))
+//    {
+//        if(flag)
+//        {
+//            buffer.append(buf.left(buf.indexOf('$')));
+//            coder->decoder(buffer,getUserName());
+//            qDebug()<<"length:"<<buffer.length();
+//            if(buffer.length()>1000)
+//                qDebug()<<buffer;
+//            buffer.clear();
+//            flag=false;
+//        }
+//        else
+//        {
+//            buffer.clear();
+//        }
+//    }
+//    else if(buf.contains(QString("#").toLatin1()))
+//    {
+//        buffer.clear();
+//        flag=true;
+//        buffer.append(buf.right(buf.length()-buf.indexOf('#')-1));
+//    }
+//    else
+//    {
+//        if(flag)
+//            buffer.append(buf);
+//        else
+//            buffer.clear();
+//    }
 }
 
 void MainWindow::serial_writeData(QString com,QString name,QString time,QString body)

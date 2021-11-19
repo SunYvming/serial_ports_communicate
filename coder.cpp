@@ -185,7 +185,6 @@ void Coder::decoder(QByteArray input,QString thisName)
                             if(object.contains("Body"))
                                 if(object.value("Body").isObject())
                                 {
-
                                     QJsonObject bodyObject=object.value("Body").toObject();
                                     if(bodyObject.contains("Time")&&bodyObject.contains("Data")&&bodyObject.contains("FileName"))
                                         if(bodyObject.value("Time").isString()&&bodyObject.value("Data").isString()&&bodyObject.value("FileName").isString())
@@ -195,24 +194,51 @@ void Coder::decoder(QByteArray input,QString thisName)
                                             body=bodyObject.value("Data").toString();
                                             if(receiverName==thisName)
                                             {
-                                                qDebug()<<bodyObject.value("Number").toString()<<endl<<bodyObject.value("Count").toString()<<endl;
+                                                file=new QFile("./"+thisName+"/"+fileName);
+                                                QFile *logFile=new QFile("./logReadFile.txt");
+                                                qDebug()<<"Debug: Number:"<<bodyObject.value("Number").toString()<<" total:"<<bodyObject.value("Count").toString()<<endl;
                                                 if(bodyObject.value("Number").toString()!=bodyObject.value("Count").toString())
                                                 {
-                                                    qDebug()<<'1'<<endl;
                                                     foreach(file_t t,list)
                                                     {
                                                         if(t.name==fileName)
                                                         {
-                                                            t.buffer.append(body);
+                                                            //t.buffer.append(body);
+
+
+                                                            logFile->open(QFile::Append|QFile::Text);
+                                                            logFile->write(body.toUtf8());
+                                                            logFile->close();
+
+                                                            file->open(QFile::Append);
+                                                            file->write(QByteArray::fromBase64(body.toUtf8()));
+                                                            file->close();
+                                                            delete  file;
+
                                                             return;
                                                         }
                                                     }
+                                                    logFile->open(QFile::Append|QFile::Text);
+                                                    logFile->write(fileName.toUtf8());
+                                                    logFile->write("\n");
+                                                    logFile->write(body.toUtf8());
+                                                    logFile->close();
+
                                                     file_t newFile;
-                                                    newFile.buffer.append(body);
                                                     newFile.name=fileName;
                                                     list.append(newFile);
+
+                                                    file->open(QFile::WriteOnly);
+                                                    file->write(QByteArray::fromBase64(body.toUtf8()));
+                                                    file->close();
+                                                    delete file;
+
                                                     return;
                                                 }
+                                                logFile->open(QFile::Append);
+                                                logFile->write(body.toUtf8());
+                                                logFile->close();
+
                                                 dir=new QDir;
                                                 if(!dir->exists("./"+thisName))
                                                 {
@@ -222,6 +248,7 @@ void Coder::decoder(QByteArray input,QString thisName)
 
                                                 file_t targetFile;
                                                 targetFile.name=fileName;
+                                                targetFile.buffer.clear();
                                                 for(int i=0;i<list.length();i++)
                                                 {
                                                     if(list.at(i).name==fileName)
@@ -231,16 +258,15 @@ void Coder::decoder(QByteArray input,QString thisName)
                                                         list.removeAt(i);
                                                     }
                                                 }
-                                                QByteArray fileData=QByteArray::fromBase64(targetFile.buffer.toUtf8());
-                                                if(file->open(QFile::WriteOnly))
-                                                {
-                                                    file->write(fileData);
-                                                    file->close();
-                                                }
+
+                                                file->open(QFile::Append);
+                                                file->write(QByteArray::fromBase64(body.toUtf8()));
+                                                file->close();
+
+                                                delete  file;
 
                                                 body=fileName;
                                                 delete dir;
-                                                delete file;
                                             }
                                         }
                                         else return;
