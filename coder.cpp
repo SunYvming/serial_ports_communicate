@@ -194,8 +194,14 @@ void Coder::decoder(QByteArray input,QString thisName)
                                             body=bodyObject.value("Data").toString();
                                             if(receiverName==thisName)
                                             {
+                                                dir=new QDir;
+                                                if(!dir->exists("./"+thisName))
+                                                {
+                                                    dir->mkdir("./"+thisName);
+                                                }
                                                 file=new QFile("./"+thisName+"/"+fileName);
-                                                QFile *logFile=new QFile("./logReadFile.txt");
+
+                                                file=new QFile("./"+thisName+"/"+fileName);
                                                 qDebug()<<"Debug: Number:"<<bodyObject.value("Number").toString()<<" total:"<<bodyObject.value("Count").toString()<<endl;
                                                 if(bodyObject.value("Number").toString()!=bodyObject.value("Count").toString())
                                                 {
@@ -205,11 +211,6 @@ void Coder::decoder(QByteArray input,QString thisName)
                                                         {
                                                             //t.buffer.append(body);
 
-
-                                                            logFile->open(QFile::Append|QFile::Text);
-                                                            logFile->write(body.toUtf8());
-                                                            logFile->close();
-
                                                             file->open(QFile::Append);
                                                             file->write(QByteArray::fromBase64(body.toUtf8()));
                                                             file->close();
@@ -218,11 +219,6 @@ void Coder::decoder(QByteArray input,QString thisName)
                                                             return;
                                                         }
                                                     }
-                                                    logFile->open(QFile::Append|QFile::Text);
-                                                    logFile->write(fileName.toUtf8());
-                                                    logFile->write("\n");
-                                                    logFile->write(body.toUtf8());
-                                                    logFile->close();
 
                                                     file_t newFile;
                                                     newFile.name=fileName;
@@ -235,16 +231,8 @@ void Coder::decoder(QByteArray input,QString thisName)
 
                                                     return;
                                                 }
-                                                logFile->open(QFile::Append);
-                                                logFile->write(body.toUtf8());
-                                                logFile->close();
 
-                                                dir=new QDir;
-                                                if(!dir->exists("./"+thisName))
-                                                {
-                                                    dir->mkdir("./"+thisName);
-                                                }
-                                                file=new QFile("./"+thisName+"/"+fileName);
+
 
                                                 file_t targetFile;
                                                 targetFile.name=fileName;
