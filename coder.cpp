@@ -199,7 +199,6 @@ void Coder::decoder(QByteArray input,QString thisName)
                                                 {
                                                     dir->mkdir("./"+thisName);
                                                 }
-                                                file=new QFile("./"+thisName+"/"+fileName);
 
                                                 file=new QFile("./"+thisName+"/"+fileName);
                                                 qDebug()<<"Debug: Number:"<<bodyObject.value("Number").toString()<<" total:"<<bodyObject.value("Count").toString()<<endl;
