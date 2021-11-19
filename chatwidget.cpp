@@ -216,6 +216,9 @@ void ChatWidget::resizeEvent(QResizeEvent *event)
 
 void ChatWidget::fileButton_clicked()
 {
+    if(this->targetCustom==nullptr)
+        return;
+
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "./",QString(tr("All (*.*)")));
     QFile *file=new QFile(fileName,this);
     if (!file->open(QIODevice::ReadOnly))
