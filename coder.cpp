@@ -193,6 +193,7 @@ void Coder::decoder(QByteArray input,QString thisName)
                                             body=bodyObject.value("Data").toString();
                                             if(receiverName==thisName)
                                             {
+                                                emit coder_receiveFile(fileName,senderName,bodyObject.value("Number").toString().toInt(),bodyObject.value("Count").toString().toInt());
                                                 dir=new QDir;
                                                 if(!dir->exists("./"+thisName))
                                                 {
@@ -250,6 +251,8 @@ void Coder::decoder(QByteArray input,QString thisName)
                                                 file->close();
 
                                                 delete  file;
+
+                                                emit coder_receiveFileFinish(fileName,"./"+thisName+"/"+fileName);
 
                                                 body=fileName;
                                                 delete dir;

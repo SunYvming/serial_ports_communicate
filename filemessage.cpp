@@ -5,6 +5,8 @@
 #include <QFileInfo>
 #include <QFileIconProvider>
 #include <QIcon>
+#include <QDesktopServices>
+#include <QUrl>
 
 FileMessage::FileMessage(QWidget *parent) :
     QWidget(parent),
@@ -50,6 +52,22 @@ void FileMessage::progressUpdate(QString fileName, int number, int total)
         }
         parentWidget->setItemWidget(pairItem,this);
     }
+}
+
+void FileMessage::fileReceiveFinish(QString fileName, QString dir)
+{
+    if(fileName==this->fileName)
+    {
+        connect(ui->openFileButton,&QPushButton::clicked,this,[dir]{
+            QDesktopServices::openUrl(QUrl::fromLocalFile(dir));
+        });
+    }
+
+}
+
+const QString &FileMessage::getFileName() const
+{
+    return fileName;
 }
 
 void FileMessage::setParentWidget(QListWidget *newParentWidget)

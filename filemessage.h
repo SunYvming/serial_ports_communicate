@@ -27,8 +27,11 @@ public:
 
     void setParentWidget(QListWidget *newParentWidget);
 
+    const QString &getFileName() const;
+
 public slots:
     void progressUpdate(QString fileName,int number,int total);
+    void fileReceiveFinish(QString fileName,QString dir);
 
 private:
     Ui::FileMessage *ui;

@@ -5,6 +5,7 @@
 #include <QQueue>
 
 #include "customwidget.h"
+#include "filemessage.h"
 
 namespace Ui {
 class ChatWidget;
@@ -43,12 +44,14 @@ public slots:
     void listAppend(CustomWidget *target,log_t newLog);
     void fileButton_clicked();
     void timer_timeout();
+    void receiveFile(QString fileName,QString sender,int number,int count);
 
 signals:
     void writeData(QString com,QString name,QString time,QString body);
     void writeFile(QString com,QString name,QString time,QString body,QString fileName,int number,int total);
     void customSend(QString com,QString name,QString time,QString body);
     void progressChanged(QString fileName,int number,int total);
+    void progressFinish(QString fileName,QString dir);
 
 protected:
     virtual void resizeEvent(QResizeEvent *event) override;
@@ -61,6 +64,7 @@ private:
     QQueue<signal_to_emit_t> signal_to_emit;
     QList<file_to_emit_t> file_to_emit_list;
     QTimer *timer;
+    QList<QString> keeper;
 };
 
 #endif // CHATWIDGET_H

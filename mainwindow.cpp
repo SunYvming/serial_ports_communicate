@@ -23,6 +23,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->customList,&QListWidget::itemClicked,this,&MainWindow::customList_itemClicked);
     connect(coder,&Coder::coder_receiveMessage,this,&MainWindow::customMessageRead);
+    connect(coder,&Coder::coder_receiveFile,ui->chatWidget,&ChatWidget::receiveFile);
+    connect(coder,&Coder::coder_receiveFileFinish,ui->chatWidget,&ChatWidget::progressFinish);
 }
 
 MainWindow::~MainWindow()

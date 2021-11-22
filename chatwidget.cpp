@@ -54,8 +54,8 @@ void ChatWidget::setTargetCustom(CustomWidget *newTargetCustom)
 
 void ChatWidget::targetCustomChanged(CustomWidget *newTargetCustom)
 {
-
     this->targetCustom=newTargetCustom;
+    keeper.clear();
     if(targetCustom==nullptr)
     {
         ui->chatTargetNameLabel->setText("");
@@ -299,5 +299,35 @@ void ChatWidget::timer_timeout()
         emit writeFile(newSignal.com,newSignal.name,newSignal.time,newSignal.body,newSignal.fileName,newSignal.number,newSignal.total);
         emit progressChanged(newSignal.fileName,newSignal.number,newSignal.total);
     }
+}
+
+void ChatWidget::receiveFile(QString fileName, QString sender, int number, int count)
+{
+    if(this->targetCustom!=nullptr)
+        if(sender==this->targetCustom->getName())
+        {
+            emit progressChanged(fileName,number,count);
+            foreach(QString t,keeper)
+            {
+                if(t==fileName)
+                {
+                    return;
+                }
+            }
+            keeper.append(fileName);
+
+            FileMessage* message = new FileMessage(ui->logListWidget);
+            QListWidgetItem* item = new QListWidgetItem(ui->logListWidget);
+            item->setSizeHint(QSize(ui->logListWidget->width(),100));
+            message->setPairItem(item);
+            message->setFileName(fileName);
+            message->setTotal(count);
+            message->setIsSender(false);
+            message->setParentWidget(ui->logListWidget);
+            connect(this,&ChatWidget::progressChanged,message,&FileMessage::progressUpdate);
+            connect(this,&ChatWidget::progressFinish,message,&FileMessage::fileReceiveFinish);
+            ui->logListWidget->setItemWidget(item, message);
+            ui->logListWidget->setCurrentRow(ui->logListWidget->count()-1);
+        }
 }
 

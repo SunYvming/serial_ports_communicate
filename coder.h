@@ -33,6 +33,8 @@ public:
 signals:
     void coder_receiveBeat(QString com,QString name,QString time);
     void coder_receiveMessage(log_t newLog);
+    void coder_receiveFile(QString fileName,QString sender,int number,int count);
+    void coder_receiveFileFinish(QString fileName,QString dir);
 
 private:
     QList<file_t> list;
