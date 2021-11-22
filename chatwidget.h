@@ -25,6 +25,12 @@ class ChatWidget : public QWidget
         int total;
     }signal_to_emit_t;
 
+    typedef struct
+    {
+        QQueue<signal_to_emit_t> signalQueue;
+        bool isAccept;
+    }file_to_emit_t;
+
 public:
     explicit ChatWidget(QWidget *parent = nullptr);
     ~ChatWidget();
@@ -42,6 +48,7 @@ signals:
     void writeData(QString com,QString name,QString time,QString body);
     void writeFile(QString com,QString name,QString time,QString body,QString fileName,int number,int total);
     void customSend(QString com,QString name,QString time,QString body);
+    void progressChanged(QString fileName,int number,int total);
 
 protected:
     virtual void resizeEvent(QResizeEvent *event) override;
@@ -52,6 +59,7 @@ private:
     //ReadOnly!!!
     CustomWidget *targetCustom;
     QQueue<signal_to_emit_t> signal_to_emit;
+    QList<file_to_emit_t> file_to_emit_list;
     QTimer *timer;
 };
 

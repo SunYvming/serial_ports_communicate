@@ -14,6 +14,7 @@
 #include <QFileDialog>
 
 #include "qnchatmessage.h"
+#include "filemessage.h"
 
 ChatWidget::ChatWidget(QWidget *parent) :
     QWidget(parent),
@@ -201,14 +202,17 @@ void ChatWidget::resizeEvent(QResizeEvent *event)
 
     for(int i = 0; i < ui->logListWidget->count(); i++)
     {
-        QNChatMessage* messageW = (QNChatMessage*)ui->logListWidget->itemWidget(ui->logListWidget->item(i));
-        QListWidgetItem* item = ui->logListWidget->item(i);
+        if(QString(ui->logListWidget->itemWidget(ui->logListWidget->item(i))->metaObject()->className())=="QNChatMessage")
+        {
+            QNChatMessage* messageW = (QNChatMessage*)ui->logListWidget->itemWidget(ui->logListWidget->item(i));
+            QListWidgetItem* item = ui->logListWidget->item(i);
 
-        messageW->setFixedWidth(ui->logListWidget->width());
-        QSize size = messageW->fontRect(messageW->text());
-        item->setSizeHint(size);
-        messageW->setText(messageW->text(), messageW->time(), size, messageW->userType());
-        ui->logListWidget->setItemWidget(item, messageW);
+            messageW->setFixedWidth(ui->logListWidget->width());
+            QSize size = messageW->fontRect(messageW->text());
+            item->setSizeHint(size);
+            messageW->setText(messageW->text(), messageW->time(), size, messageW->userType());
+            ui->logListWidget->setItemWidget(item, messageW);
+        }
     }
     ui->logListWidget->setCurrentRow(ui->logListWidget->count()-1);
 }
@@ -231,6 +235,8 @@ void ChatWidget::fileButton_clicked()
 
     int length=data.length();
 
+    file_to_emit_t newFile;
+    newFile.signalQueue.clear();
     for(int i=1;i<=(length/3000)+1;i++)
     {
         signal_to_emit_t newSignal;
@@ -242,21 +248,56 @@ void ChatWidget::fileButton_clicked()
         newSignal.number=i;
         newSignal.total=(length/3000)+1;
         newSignal.fileName=name;
-        signal_to_emit.enqueue(newSignal);
+        newFile.signalQueue.enqueue(newSignal);
     }
+    //
+    newFile.isAccept=true;
+    //
+    file_to_emit_list.append(newFile);
+
+    emit customSend(this->targetCustom->getCom(),this->targetCustom->getName(),QString::number(QDateTime::currentDateTimeUtc().toTime_t()),name);
+
+    FileMessage* message = new FileMessage(ui->logListWidget);
+    QListWidgetItem* item = new QListWidgetItem(ui->logListWidget);
+    item->setSizeHint(QSize(ui->logListWidget->width(),100));
+    message->setPairItem(item);
+    message->setFileName(name);
+    message->setTotal((length/3000)+1);
+    message->setIsSender(true);
+    message->setParentWidget(ui->logListWidget);
+    connect(this,&ChatWidget::progressChanged,message,&FileMessage::progressUpdate);
+    ui->logListWidget->setItemWidget(item, message);
+    ui->logListWidget->setCurrentRow(ui->logListWidget->count()-1);
 
     file->close();
     delete file;
-    emit customSend(this->targetCustom->getCom(),this->targetCustom->getName(),QString::number(QDateTime::currentDateTimeUtc().toTime_t()),name);
-
 }
 
 void ChatWidget::timer_timeout()
 {
+    if(!file_to_emit_list.isEmpty())
+    {
+        for(int i=0;i<file_to_emit_list.length();)
+        {
+            file_to_emit_t tempFile=file_to_emit_list.at(i);
+            if(tempFile.isAccept==true)
+            {
+                while(!tempFile.signalQueue.isEmpty())
+                {
+                    signal_to_emit.enqueue(tempFile.signalQueue.dequeue());
+                }
+                file_to_emit_list.removeAt(i);
+            }
+            else i++;
+        }
+    }
+
+
     if(!signal_to_emit.isEmpty())
     {
         signal_to_emit_t newSignal=signal_to_emit.dequeue();
         emit writeFile(newSignal.com,newSignal.name,newSignal.time,newSignal.body,newSignal.fileName,newSignal.number,newSignal.total);
+        emit progressChanged(newSignal.fileName,newSignal.number,newSignal.total);
     }
 }
 

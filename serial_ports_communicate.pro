@@ -14,6 +14,7 @@ SOURCES += \
     coder.cpp \
     customwidget.cpp \
     debugthread.cpp \
+    filemessage.cpp \
     main.cpp \
     joindialog.cpp \
     mainwindow.cpp \
@@ -26,6 +27,7 @@ HEADERS += \
     config.h \
     customwidget.h \
     debugthread.h \
+    filemessage.h \
     joindialog.h \
     mainwindow.h \
     mycombobox.h \
@@ -35,6 +37,7 @@ HEADERS += \
 FORMS += \
     chatwidget.ui \
     customwidget.ui \
+    filemessage.ui \
     joindialog.ui \
     mainwindow.ui
 
