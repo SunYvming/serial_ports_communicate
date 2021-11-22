@@ -13,7 +13,6 @@
 #include <QTextCodec>
 #include <QFile>
 #include <QDir>
-#include <QMimeDatabase>
 #include <QBuffer>
 #include <QImageReader>
 
